@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #3b3a00; /* Dark yellowish background */
+            color: white;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            padding: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #ffcc00; /* Bright yellow */
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+        }
+
+        .search-container {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 500px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .search-container input {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ffb300; /* Yellow border */
+            width: 70%;
+        }
+
+        .search-container button {
+            padding: 10px 15px;
+            font-size: 1rem;
+            background: #ffcc00; /* Bright yellow button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
+        }
+
+        .search-container button:hover {
+            background: #ffb300; /* Slightly darker yellow on hover */
+            box-shadow: 0 0 20px rgba(255, 165, 0, 1);
+        }
+
+        .pokemon-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .pokemon-card {
+            width: 200px;
+            background: linear-gradient(135deg, #ffcc00, #ffb200); /* Yellow gradient */
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(255, 223, 0, 0.7);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pokemon-card:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.8);
+        }
+
+        .pokemon-card img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .pokemon-info {
+            margin-top: 10px;
+            color: #fff7b2; /* Light yellow */
+        }
+
+        .pokemon-info span {
+            display: block;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pokédex</h1>
+    </header>
+
+    <!-- Search Box and Button -->
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search Pokémon by name or ID...">
+        <button id="search-button">Search</button>
+    </div>
+
+    <div class="pokemon-grid" id="pokemon-grid">
+        <!-- Pokémon cards will be dynamically added here -->
+    </div>
+
+    <script>
+        const searchInput = document.getElementById("search-input");
+        const searchButton = document.getElementById("search-button");
+        const pokemonGrid = document.getElementById("pokemon-grid");
+
+        // Fetch Pokémon by name or ID
+        async function fetchPokemon(query) {
+            const url = `https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                return data;
+            } else {
+                alert('Pokémon not found! Please try again.');
+                return null;
+            }
+        }
+
+        // Create a Pokémon card and add it to the grid
+        function createPokemonCard(pokemon) {
+            const card = document.createElement("div");
+            card.classList.add("pokemon-card");
+            card.innerHTML = `
+                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+                <h3>${pokemon.name.toUpperCase()}</h3>
+                <div class="pokemon-info">
+                    <span><strong>Type:</strong> ${pokemon.types.map(t => t.type.name).join(", ")}</span>
+                    <span><strong>Attack:</strong> ${pokemon.stats[1].base_stat}</span>
+                    <span><strong>Defense:</strong> ${pokemon.stats[2].base_stat}</span>
+                    <span><strong>HP:</strong> ${pokemon.stats[0].base_stat}</span>
+                </div>
+            `;
+            pokemonGrid.innerHTML = ''; // Clear previous results
+            pokemonGrid.appendChild(card);
+        }
+
+        // Handle search button click
+        searchButton.addEventListener("click", async () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                const pokemon = await fetchPokemon(query);
+                if (pokemon) {
+                    createPokemonCard(pokemon);
+                }
+            } else {
+                alert("Please enter a Pokémon name or ID.");
+            }
+        });
+
+        // Optionally, allow pressing Enter to trigger search
+        searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                searchButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

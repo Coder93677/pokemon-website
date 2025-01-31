@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #3b3a00; /* Dark yellowish background */
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #ffcc00; /* Bright yellow */
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: linear-gradient(135deg, #ffcc00, #ffb200); /* Gradient yellow */
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 223, 0, 0.5), /* Outer glow */
+                        0 0 30px rgba(255, 165, 0, 0.7);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 223, 0, 0.6), 
+                        0 0 40px rgba(255, 165, 0, 0.9);
+        }
+
+        .card img {
+            width: 80%;
+            height: auto;
+            border-radius: 15px; /* Slightly rounded corners */
+            margin-bottom: 15px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            color: #fff7b2; /* Light yellow */
+            text-shadow: 0 0 10px rgba(255, 223, 0, 0.7), /* Text glow */
+                         0 0 15px rgba(255, 165, 0, 0.9);
+        }
+
+        /* Load More Button */
+        .load-more {
+            margin: 20px 0;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background: #ffb200; /* Yellowish button */
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .load-more:hover {
+            background: #ffcc00; /* Brighter yellow on hover */
+            box-shadow: 0 0 20px rgba(255, 165, 0, 1);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Card Pokédex</h1>
+    </header>
+    <main>
+        <div class="card-container" id="card-container">
+            <!-- Pokémon Cards will be dynamically loaded here -->
+        </div>
+        <button class="load-more" id="load-more">Load More Pokémon</button>
+    </main>
+    <script>
+        const cardContainer = document.getElementById("card-container");
+        const loadMoreButton = document.getElementById("load-more");
+
+        let page = 1; // Initial page number
+        const pageSize = 20; // Number of cards to load per page
+
+        // Fetch Pokémon cards using Pokémon TCG API
+        async function fetchPokemonCards() {
+            try {
+                const response = await fetch(`https://api.pokemontcg.io/v2/cards?page=${page}&pageSize=${pageSize}`);
+                const data = await response.json();
+                displayPokemonCards(data.data);
+                if (data.data.length < pageSize) {
+                    loadMoreButton.style.display = "none"; // Hide button if no more cards
+                }
+            } catch (error) {
+                console.error("Failed to fetch Pokémon cards:", error);
+                loadMoreButton.style.display = "none";
+            }
+        }
+
+        // Display Pokémon cards dynamically
+        function displayPokemonCards(cards) {
+            cards.forEach(card => {
+                const cardElement = document.createElement("div");
+                cardElement.classList.add("card");
+
+                cardElement.innerHTML = `
+                    <img src="${card.images.large}" alt="${card.name}">
+                    <h2>${card.name}</h2>
+                `;
+                cardContainer.appendChild(cardElement);
+            });
+        }
+
+        // Load more cards on button click
+        loadMoreButton.addEventListener("click", () => {
+            page++;
+            fetchPokemonCards();
+        });
+
+        // Fetch and render the first set of Pokémon cards on page load
+        fetchPokemonCards();
+    </script>
+</body>
+</html>
